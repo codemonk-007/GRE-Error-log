@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GRE Quant Mistakes Journal</title>
+<style>
+  :root {
+    --bg: #f4f6fa;
+    --surface: #ffffff;
+    --surface-alt: #f8fafc;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --text-faint: #94a3b8;
+    --primary: #3b5bdb;
+    --primary-soft: #eef2ff;
+    --primary-hover: #2f49b3;
+    --danger: #dc2626;
+    --danger-soft: #fef2f2;
+    --success: #059669;
+    --success-soft: #ecfdf5;
+    --accent-edge: #7c3aed;
+    --accent-edge-soft: #f5f3ff;
+    --accent-mistake: #d97706;
+    --accent-mistake-soft: #fffbeb;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px 20px 40px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page-header {
+    max-width: 1600px;
+    margin: 0 auto 18px;
+  }
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 4px;
+    color: var(--text);
+  }
+  .page-header .sub {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Toolbar ---------- */
+  #toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    max-width: 1600px;
+    margin: 0 auto 16px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: saturate(180%) blur(8px);
+    -webkit-backdrop-filter: saturate(180%) blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.03);
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--border-strong);
+    border-radius: 7px;
+    background: var(--surface);
+    color: var(--text);
+    transition: all 0.12s ease;
+  }
+  .btn:hover {
+    background: var(--surface-alt);
+    border-color: #94a3b8;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    box-shadow: 0 1px 2px rgba(59, 91, 219, 0.25);
+  }
+  .btn.primary:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+  }
+  .btn.danger {
+    color: var(--danger);
+    border-color: #fecaca;
+    background: var(--danger-soft);
+  }
+  .btn.danger:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+  }
+
+  #toolbar .spacer { flex: 1; }
+
+  #toolbar .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  #toolbar .saved-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--success-soft);
+    color: var(--success);
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  #toolbar .saved-indicator.show { opacity: 1; }
+  #toolbar .saved-indicator::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+  }
+  #toolbar .info {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 6px 12px;
+    background: var(--primary-soft);
+    border-radius: 20px;
+  }
+  #toolbar .info span {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  /* ---------- Table ---------- */
+  .table-wrap {
+    max-width: 1600px;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.04);
+  }
+  .table-scroll { overflow-x: auto; }
+
+  table.journal {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: max-content;
+    min-width: 100%;
+    font-size: 12px;
+  }
+
+  table.journal thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 2px solid var(--border-strong);
+    border-right: 1px solid var(--border);
+    padding: 10px 10px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  table.journal thead th:last-child { border-right: none; }
+
+  table.journal tbody td {
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    padding: 8px 10px;
+    vertical-align: top;
+    background: var(--surface);
+    transition: background 0.1s ease;
+  }
+  table.journal tbody td:last-child { border-right: none; }
+  table.journal tbody tr:hover td { background: #fafbfd; }
+  table.journal tbody tr:last-child td { border-bottom: none; }
+
+  .row-num {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-faint);
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-bottom: 4px;
+  }
+
+  table.journal input[type="text"],
+  table.journal input[type="date"],
+  table.journal select {
+    width: 100%;
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--text);
+    padding: 5px 7px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+  }
+  table.journal input[type="text"]:focus,
+  table.journal input[type="date"]:focus,
+  table.journal select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.12);
+  }
+
+  table.journal textarea {
+    width: 100%;
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--text);
+    line-height: 1.45;
+    padding: 6px 8px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    resize: vertical;
+    min-height: 68px;
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+  }
+  table.journal textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.12);
+  }
+
+  .col-num     { width: 40px;  min-width: 40px; }
+  .col-date    { width: 110px; min-width: 110px; }
+  .col-source  { width: 110px; min-width: 110px; }
+  .col-qno     { width: 60px;  min-width: 60px; }
+  .col-topic   { width: 130px; min-width: 130px; }
+  .col-time    { width: 85px;  min-width: 85px; }
+  .col-ans     { width: 80px;  min-width: 80px; }
+  .col-mistake { width: 220px; min-width: 220px; }
+  .col-edge    { width: 280px; min-width: 280px; }
+  .col-cause   { width: 200px; min-width: 200px; }
+  .col-rule    { width: 200px; min-width: 200px; }
+  .col-actions { width: 68px;  min-width: 68px; }
+
+  .checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .checks label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px 3px 6px;
+    font-size: 11px;
+    color: var(--text);
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.1s ease;
+    white-space: nowrap;
+  }
+  .checks label:hover {
+    border-color: #94a3b8;
+    background: #eef2f7;
+  }
+  .checks label:has(input:checked) {
+    background: var(--accent-mistake-soft);
+    border-color: #fcd34d;
+    color: #78350f;
+    font-weight: 500;
+  }
+
+  .edge-list {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 8px 8px;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    scrollbar-width: thin;
+  }
+  .edge-list::-webkit-scrollbar { width: 8px; }
+  .edge-list::-webkit-scrollbar-track { background: transparent; }
+  .edge-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+    border: 2px solid var(--surface-alt);
+  }
+  .edge-list::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+  .edge-group { margin-bottom: 10px; }
+  .edge-group:last-child { margin-bottom: 0; }
+  .edge-group.hidden { display: none; }
+
+  .edge-group-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent-edge);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+    border-bottom: 1px dashed #ddd6fe;
+  }
+  .edge-group-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .edge-group-items label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px 2px 5px;
+    font-size: 11px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.1s ease;
+    white-space: nowrap;
+  }
+  .edge-group-items label:hover {
+    border-color: #a78bfa;
+    background: #faf5ff;
+  }
+  .edge-group-items label:has(input:checked) {
+    background: var(--accent-edge-soft);
+    border-color: #c4b5fd;
+    color: #5b21b6;
+    font-weight: 500;
+  }
+
+  input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    flex-shrink: 0;
+    border: 1.5px solid #94a3b8;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.12s ease;
+  }
+  input[type="checkbox"]:hover { border-color: var(--primary); }
+  input[type="checkbox"]:checked {
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+  input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .edge-empty {
+    color: var(--text-faint);
+    font-style: italic;
+    font-size: 11px;
+    padding: 6px 4px;
+    text-align: center;
+  }
+
+  .action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: stretch;
+  }
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 26px;
+    font-size: 13px;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-muted);
+    border-radius: 6px;
+    transition: all 0.12s ease;
+  }
+  .action-btn:hover {
+    background: var(--primary-soft);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .action-btn.del:hover {
+    background: var(--danger-soft);
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  table.journal tbody tr:nth-child(even) td { background: #fcfdfe; }
+  table.journal tbody tr:nth-child(even):hover td { background: #f5f7fb; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-faint);
+    font-size: 13px;
+  }
+  .empty-state.hidden { display: none; }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #1e293b;
+    color: #fff;
+    font-size: 13px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+    z-index: 100;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.error { background: var(--danger); }
+  #toast.success { background: var(--success); }
+
+  @media print {
+    @page { margin: 10mm; size: landscape; }
+    body { background: #fff; padding: 0; font-size: 10px; }
+    .page-header h1 { font-size: 16px; }
+    .page-header .sub { font-size: 10px; }
+    #toolbar { display: none; }
+    .table-wrap {
+      box-shadow: none;
+      border: 1px solid #999;
+      border-radius: 0;
+      max-width: 100%;
+    }
+    .table-scroll { overflow: visible; }
+    table.journal { font-size: 9px; }
+    table.journal thead th {
+      position: static;
+      background: #eee !important;
+      color: #000;
+      padding: 5px;
+    }
+    table.journal tbody td { padding: 4px; }
+    .edge-list { max-height: none; overflow: visible; background: #fff; }
+    .action-group, .col-actions { display: none; }
+    .checks label, .edge-group-items label {
+      background: #fff !important;
+      border-color: #ccc !important;
+      color: #000 !important;
+    }
+    .empty-state { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>GRE Quant Mistakes Journal</h1>
+  <div class="sub">Auto-saves to your browser. Use Export to back up your journal.</div>
+</header>
+
+<div id="toolbar">
+  <button class="btn primary" onclick="addRow()">+ Add Entry</button>
+  <button class="btn" onclick="exportJournal()" title="Download a JSON backup">↧ Export</button>
+  <button class="btn" onclick="document.getElementById('import-file').click()" title="Load a JSON backup">↥ Import</button>
+  <button class="btn danger" onclick="clearAll()">Clear All</button>
+  <input type="file" id="import-file" accept="application/json" hidden onchange="importJournal(this.files[0])">
+  <div class="spacer"></div>
+  <div class="status">
+    <span class="saved-indicator" id="saved-indicator">Saved</span>
+    <span class="info">Entries: <span id="count">0</span></span>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <div class="table-scroll">
+    <table class="journal">
+      <thead>
+        <tr>
+          <th class="col-num">#</th>
+          <th class="col-date">Date</th>
+          <th class="col-source">Source</th>
+          <th class="col-qno">Q#</th>
+          <th class="col-topic">Topic</th>
+          <th class="col-time">Time</th>
+          <th class="col-ans">My Ans</th>
+          <th class="col-ans">Correct</th>
+          <th class="col-mistake">Mistake Types</th>
+          <th class="col-edge">Edge Cases</th>
+          <th class="col-cause">Root Cause</th>
+          <th class="col-rule">Rule to Remember</th>
+          <th class="col-actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty-state hidden" id="empty-state">
+      No entries yet. Click <strong>+ Add Entry</strong> to get started.
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   DATA
+============================================================ */
+const EDGE_GROUPS = [
+  { title: "General", items: [
+    "Denominator ≠ 0",
+    "\"Must be true\" → counterexample",
+    "\"Could be true\" → one example",
+    "\"Least / greatest possible\"",
+    "\"At least\" vs \"at most\"",
+    "Check exact question",
+    "Stopped 1–2 steps early?",
+    "Repetition allowed?",
+    "Domain restrictions"
+  ]},
+  { title: "Arithmetic & Number Theory", items: [
+    "Positive / negative / zero", "Even / odd", "Divisibility rules",
+    "Prime vs composite", "LCM vs GCD", "Factors vs multiples",
+    "Consecutive integers", "Remainders", "Units digit cycles"
+  ]},
+  { title: "Algebra", items: [
+    "Extraneous solutions", "Discriminant sign",
+    "Systems: none / infinite", "Degree of polynomial",
+    "Factoring forms", "Inequality direction", "Quadratic formula fallback"
+  ]},
+  { title: "Exponents & Roots", items: [
+    "x^0 = 1 (x ≠ 0)", "Negative base / fractional exp",
+    "Even root radicand ≥ 0", "Squaring → extraneous roots?",
+    "Exponent rule: add vs multiply", "Root of a product"
+  ]},
+  { title: "Inequalities & Absolute Value", items: [
+    "Flip sign on ×/÷ by negative", "|x| → two cases",
+    "Open vs closed interval", "Compound inequalities", "Boundary values"
+  ]},
+  { title: "Ratios & Proportions", items: [
+    "Part-to-part vs part-to-whole", "Units consistency",
+    "Direct vs inverse proportion", "Cross-multiplication valid?",
+    "Ratios with same units"
+  ]},
+  { title: "Percents & Interest", items: [
+    "Percent of vs percent change", "Successive percent change",
+    "Simple vs compound interest", "Percent increase vs decrease",
+    "Base value ambiguity"
+  ]},
+  { title: "Word Problems", items: [
+    "Rate × time = distance", "Work rate: add reciprocals",
+    "Mixture / alligation", "Age problems", "Unit conversion",
+    "Hidden constraints"
+  ]},
+  { title: "Sequences & Functions", items: [
+    "Arithmetic vs geometric", "Recursive vs explicit",
+    "Domain of function", "f(g(x)) composition",
+    "Index starting value (n=0 or 1?)"
+  ]},
+  { title: "Statistics & Averages", items: [
+    "Mean vs median vs mode", "Weighted average", "Range",
+    "Standard deviation", "Quartiles / IQR",
+    "Outliers effect on mean", "Sum = mean × count"
+  ]},
+  { title: "Combinatorics", items: [
+    "Permutation vs combination", "With / without replacement",
+    "Circular arrangements", "Inclusion–exclusion", "Identical items"
+  ]},
+  { title: "Probability", items: [
+    "Independent vs dependent", "Mutually exclusive",
+    "Complement rule", "Conditional probability",
+    "With / without replacement"
+  ]},
+  { title: "Geometry", items: [
+    "Triangle inequality", "30-60-90 / 45-45-90", "Circle formulas",
+    "Area vs perimeter", "Similar triangles", "Angle relationships",
+    "Inscribed vs central angle"
+  ]},
+  { title: "Coordinate Geometry", items: [
+    "Slope sign (+, −, 0, undefined)", "Distance formula",
+    "Midpoint formula", "Parallel / perpendicular slopes",
+    "Quadrants sign rules"
+  ]},
+  { title: "Data Interpretation", items: [
+    "Percent vs absolute", "Units (thousands, millions)",
+    "Read axes carefully", "Interpolation vs extrapolation",
+    "Total vs per-capita"
+  ]}
+];
+
+const MISTAKE_TYPES = [
+  "Misread question", "Domain / edge case", "Algebra slip",
+  "Arithmetic slip", "Stopped early", "Time pressure",
+  "Concept gap", "Fell for trap", "Overcomplicated", "Other"
+];
+
+const TOPICS = EDGE_GROUPS.filter(g => g.title !== "General").map(g => g.title);
+const STORAGE_KEY = "greJournal.v1";
+
+const MISTAKE_CHECKS_HTML = MISTAKE_TYPES.map(m =>
+  `<label><input type="checkbox" data-field="mistake" value="${m}"><span>${m}</span></label>`
+).join("");
+
+const EDGE_LIST_HTML = EDGE_GROUPS.map(g => `
+  <div class="edge-group" data-topic="${g.title}">
+    <div class="edge-group-title">${g.title}</div>
+    <div class="edge-group-items">
+      ${g.items.map(item =>
+        `<label><input type="checkbox" data-field="edge" data-topic="${g.title}" value="${item.replace(/"/g,'&quot;')}"><span>${item}</span></label>`
+      ).join("")}
+    </div>
+  </div>
+`).join("") + `<div class="edge-empty" data-field="edge-empty">Select a topic to load its edge cases.</div>`;
+
+/* ============================================================
+   STATE
+============================================================ */
+let rowCounter = 0;
+let saveTimer = null;
+
+/* ============================================================
+   HELPERS
+============================================================ */
+function todayISO() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function storageAvailable() {
+  try {
+    const t = "__test__";
+    localStorage.setItem(t, t);
+    localStorage.removeItem(t);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+const HAS_STORAGE = storageAvailable();
+
+/* ============================================================
+   BUILD ROW
+============================================================ */
+function buildRow(entry) {
+  rowCounter++;
+  const id = "row-" + rowCounter;
+  const tr = document.createElement("tr");
+  tr.id = id;
+
+  const dateVal = (entry && entry.date) || todayISO();
+
+  tr.innerHTML = `
+    <td class="col-num"><span class="row-num">${rowCounter}</span></td>
+    <td class="col-date"><input type="date" data-field="date" value="${dateVal}"></td>
+    <td class="col-source"><input type="text" data-field="source" placeholder="GRE Q298"></td>
+    <td class="col-qno"><input type="text" data-field="qno"></td>
+    <td class="col-topic">
+      <select data-field="topic" onchange="onTopicChange(this)">
+        <option value="">—</option>
+        ${TOPICS.map(t => `<option value="${t}">${t}</option>`).join("")}
+      </select>
+    </td>
+    <td class="col-time">
+      <select data-field="time">
+        <option value="">—</option>
+        <option>&lt;30s</option>
+        <option>30–60s</option>
+        <option>1–2 min</option>
+        <option>2–3 min</option>
+        <option>&gt;3 min</option>
+      </select>
+    </td>
+    <td class="col-ans"><input type="text" data-field="myans"></td>
+    <td class="col-ans"><input type="text" data-field="corrans"></td>
+    <td class="col-mistake"><div class="checks">${MISTAKE_CHECKS_HTML}</div></td>
+    <td class="col-edge"><div class="edge-list">${EDGE_LIST_HTML}</div></td>
+    <td class="col-cause"><textarea data-field="cause" placeholder="Why did this happen?"></textarea></td>
+    <td class="col-rule"><textarea data-field="rule" placeholder="Short rule to remember."></textarea></td>
+    <td class="col-actions">
+      <div class="action-group">
+        <button type="button" class="action-btn" title="Duplicate row" onclick="duplicateRow('${id}')">⎘</button>
+        <button type="button" class="action-btn del" title="Delete row" onclick="deleteRow('${id}')">×</button>
+      </div>
+    </td>
+  `;
+
+  /* ---- Restore saved values ---- */
+  if (entry) {
+    tr.querySelector('[data-field="source"]').value = entry.source || "";
+    tr.querySelector('[data-field="qno"]').value = entry.qno || "";
+    tr.querySelector('[data-field="topic"]').value = entry.topic || "";
+    tr.querySelector('[data-field="time"]').value = entry.time || "";
+    tr.querySelector('[data-field="myans"]').value = entry.myans || "";
+    tr.querySelector('[data-field="corrans"]').value = entry.corrans || "";
+    tr.querySelector('[data-field="cause"]').value = entry.cause || "";
+    tr.querySelector('[data-field="rule"]').value = entry.rule || "";
+
+    const mistakeValues = entry.mistakes || [];
+    tr.querySelectorAll('[data-field="mistake"]').forEach(cb => {
+      cb.checked = mistakeValues.includes(cb.value);
+    });
+
+    const edgeValues = entry.edges || [];
+    tr.querySelectorAll('[data-field="edge"]').forEach(cb => {
+      cb.checked = edgeValues.includes(cb.value);
+    });
+  }
+
+  filterEdgeCases(tr);
+  return tr;
+}
+
+/* ============================================================
+   ADD ROW
+============================================================ */
+function addRow() {
+  const tr = buildRow(null);
+  document.getElementById("tbody").appendChild(tr);
+  updateCount();
+  scheduleSave();
+  return tr;
+}
+
+/* ============================================================
+   FILTER EDGE CASES BY TOPIC
+============================================================ */
+function onTopicChange(selectEl) {
+  filterEdgeCases(selectEl.closest("tr"));
+}
+
+function filterEdgeCases(row) {
+  const topic = row.querySelector('[data-field="topic"]').value;
+  row.querySelectorAll(".edge-group").forEach(g => {
+    const groupTopic = g.getAttribute("data-topic");
+    const show = groupTopic === "General" || groupTopic === topic;
+    g.classList.toggle("hidden", !show);
+  });
+  const emptyMsg = row.querySelector('[data-field="edge-empty"]');
+  emptyMsg.style.display = topic ? "none" : "block";
+}
+
+/* ============================================================
+   DUPLICATE ROW
+============================================================ */
+function duplicateRow(sourceId) {
+  const source = document.getElementById(sourceId);
+  if (!source) return;
+
+  const entry = rowToEntry(source);
+  const clone = buildRow(entry);
+
+  source.parentNode.insertBefore(clone, source.nextSibling);
+  renumber();
+  updateCount();
+  scheduleSave();
+  toast("Row duplicated");
+}
+
+/* ============================================================
+   DELETE ROW
+============================================================ */
+function deleteRow(id) {
+  const row = document.getElementById(id);
+  if (row) row.remove();
+  renumber();
+  updateCount();
+  scheduleSave();
+}
+
+/* ============================================================
+   CLEAR ALL
+============================================================ */
+function clearAll() {
+  if (!confirm("Delete all entries? This cannot be undone.")) return;
+  document.getElementById("tbody").innerHTML = "";
+  rowCounter = 0;
+  if (HAS_STORAGE) {
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  }
+  updateCount();
+  toast("All entries cleared", "error");
+}
+
+/* ============================================================
+   RENUMBER
+============================================================ */
+function renumber() {
+  let n = 0;
+  document.querySelectorAll("#tbody tr[id^='row-']").forEach(tr => {
+    n++;
+    tr.querySelector(".row-num").textContent = n;
+  });
+  rowCounter = n;
+}
+
+/* ============================================================
+   COUNT / EMPTY STATE
+============================================================ */
+function updateCount() {
+  const rows = document.querySelectorAll("#tbody tr[id^='row-']");
+  document.getElementById("count").textContent = rows.length;
+  document.getElementById("empty-state").classList.toggle("hidden", rows.length > 0);
+}
+
+/* ============================================================
+   SERIALIZE / DESERIALIZE
+============================================================ */
+function rowToEntry(tr) {
+  const entry = {};
+  tr.querySelectorAll("[data-field]").forEach(el => {
+    const field = el.getAttribute("data-field");
+    if (el.type === "checkbox") return; // handled below
+    if (field === "edge-empty") return;
+    entry[field] = el.value;
+  });
+
+  entry.mistakes = Array.from(
+    tr.querySelectorAll('[data-field="mistake"]:checked')
+  ).map(cb => cb.value);
+
+  entry.edges = Array.from(
+    tr.querySelectorAll('[data-field="edge"]:checked')
+  ).map(cb => cb.value);
+
+  return entry;
+}
+
+function collectAllEntries() {
+  return Array.from(document.querySelectorAll("#tbody tr[id^='row-']"))
+    .map(rowToEntry);
+}
+
+/* ============================================================
+   SAVE / LOAD
+============================================================ */
+function scheduleSave() {
+  if (!HAS_STORAGE) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveJournal, 250);
+}
+
+function saveJournal() {
+  if (!HAS_STORAGE) return;
+  try {
+    const entries = collectAllEntries();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    showSavedIndicator();
+  } catch (e) {
+    console.error("Save failed:", e);
+    toast("Could not save to browser storage", "error");
+  }
+}
+
+function loadJournal() {
+  if (!HAS_STORAGE) return false;
+  let raw;
+  try { raw = localStorage.getItem(STORAGE_KEY); }
+  catch (e) { return false; }
+  if (!raw) return false;
+
+  let entries;
+  try { entries = JSON.parse(raw); }
+  catch (e) { return false; }
+  if (!Array.isArray(entries) || entries.length === 0) return false;
+
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+  rowCounter = 0;
+  entries.forEach(entry => {
+    tbody.appendChild(buildRow(entry));
+  });
+  renumber();
+  return true;
+}
+
+function showSavedIndicator() {
+  const el = document.getElementById("saved-indicator");
+  el.classList.add("show");
+  clearTimeout(el._hideTimer);
+  el._hideTimer = setTimeout(() => el.classList.remove("show"), 1400);
+}
+
+/* ============================================================
+   EXPORT / IMPORT
+============================================================ */
+function exportJournal() {
+  const entries = collectAllEntries();
+  if (entries.length === 0) {
+    toast("Nothing to export", "error");
+    return;
+  }
+  const data = JSON.stringify(entries, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `gre-journal-${todayISO()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast(`Exported ${entries.length} entries`, "success");
+}
+
+function importJournal(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    let entries;
+    try {
+      entries = JSON.parse(e.target.result);
+    } catch (err) {
+      toast("Invalid JSON file", "error");
+      return;
+    }
+    if (!Array.isArray(entries)) {
+      toast("File does not contain an entries array", "error");
+      return;
+    }
+    if (!confirm(`Import ${entries.length} entries? This will replace your current journal.`)) {
+      return;
+    }
+    const tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
+    rowCounter = 0;
+    entries.forEach(entry => tbody.appendChild(buildRow(entry)));
+    renumber();
+    updateCount();
+    saveJournal();
+    toast(`Imported ${entries.length} entries`, "success");
+  };
+  reader.readAsText(file);
+  // Reset the input so the same file can be re-imported later
+  setTimeout(() => {
+    const inp = document.getElementById("import-file");
+    if (inp) inp.value = "";
+  }, 0);
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
+let toastTimer;
+function toast(message, kind) {
+  const el = document.getElementById("toast");
+  el.textContent = message;
+  el.className = "show" + (kind ? " " + kind : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ""; }, 2200);
+}
+
+/* ============================================================
+   AUTO-SAVE LISTENERS
+============================================================ */
+document.addEventListener("input", e => {
+  if (e.target.closest("#tbody")) scheduleSave();
+});
+document.addEventListener("change", e => {
+  if (e.target.closest("#tbody")) scheduleSave();
+});
+
+/* ============================================================
+   INIT
+============================================================ */
+(function init() {
+  const loaded = loadJournal();
+  if (!loaded) {
+    addRow();
+    addRow();
+    addRow();
+  }
+  updateCount();
+})();
+</script>
+
+</body>
+</html>
