@@ -7,7 +7,7 @@
     "time": ">3 min",
     "myans": "BDE",
     "corrans": "BE",
-    "cause": "INcorrect factioring , forgot domain check for in denominator ",
+    "cause": "INcorrect factioring , forgot domain check for x in denominator ",
     "rule": "write donw the domain immediately when fractional algebraic expression ",
     "mistakes": [
       "Domain / edge case",
