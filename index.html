@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GRE Quant Mistakes Journal</title>
 <style>
   :root {
@@ -637,6 +638,91 @@
       color: #000 !important;
     }
     .empty-state { display: none; }
+  }
+
+  /* ---------- Responsive: tablet ---------- */
+  @media (max-width: 900px) {
+    body { padding: 12px 10px 28px; }
+    .page-header { margin-bottom: 10px; }
+    .page-header h1 { font-size: 18px; }
+    .page-header .sub { font-size: 12px; }
+
+    #toolbar {
+      position: static;   /* scroll away so the sticky column headers stay visible */
+      border-radius: 8px;
+      padding: 8px 10px;
+      gap: 8px;
+    }
+    #toolbar .spacer { display: none; }
+    #toolbar .status {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .table-wrap { border-radius: 10px; }
+    table.journal { font-size: 11px; }
+    table.journal thead th {
+      top: 0;
+      padding: 8px 8px;
+      font-size: 10px;
+    }
+    table.journal tbody td { padding: 7px 8px; }
+
+    .col-mistake { min-width: 190px; }
+    .col-edge    { min-width: 240px; }
+    .col-cause   { min-width: 170px; }
+    .col-rule    { min-width: 170px; }
+  }
+
+  /* ---------- Responsive: phone ---------- */
+  @media (max-width: 560px) {
+    .btn {
+      min-height: 40px;
+      padding: 9px 12px;
+    }
+    #toolbar { gap: 6px; }
+    #toolbar .status {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+    }
+
+    table.journal { font-size: 11px; }
+    table.journal thead th { padding: 7px 7px; }
+    table.journal tbody td { padding: 6px 7px; }
+    table.journal input[type="text"],
+    table.journal input[type="date"],
+    table.journal select,
+    table.journal textarea {
+      font-size: 16px;   /* prevents iOS auto-zoom on focus */
+    }
+    table.journal textarea { min-height: 58px; }
+
+    .col-date    { min-width: 96px; }
+    .col-source  { min-width: 96px; }
+    .col-qno     { min-width: 50px; }
+    .col-topic   { min-width: 110px; }
+    .col-time    { min-width: 76px; }
+    .col-ans     { min-width: 64px; }
+    .col-mistake { min-width: 180px; }
+    .col-edge    { min-width: 220px; }
+    .col-cause   { min-width: 160px; }
+    .col-rule    { min-width: 160px; }
+
+    .action-btn { height: 34px; }
+
+    .modal-overlay {
+      align-items: flex-start;
+      padding: 10px;
+    }
+    .modal {
+      max-width: 100%;
+      max-height: calc(100vh - 20px);
+      overflow-y: auto;
+      border-radius: 10px;
+    }
+    .modal-row { grid-template-columns: 1fr; }
+    .modal-body { padding: 14px 14px 16px; }
   }
 </style>
 </head>
