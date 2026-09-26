@@ -902,17 +902,40 @@ function ghHeaders() {
   };
 }
 
+function ghFriendlyError(status, message) {
+  if (status === 401) {
+    return "Bad token — the token is invalid, expired, or revoked.";
+  }
+  if (status === 403 && /personal access token/i.test(message || "")) {
+    return "Token lacks access to this repo. For a fine-grained token, set Repository permissions → Contents → \"Read and write\", and under Repository access select codemonk-007/GRE-Error-log.";
+  }
+  if (status === 403) {
+    return "Forbidden (HTTP 403) — the token needs Contents: Read and write on this repo.";
+  }
+  if (status === 404) {
+    return "Not found — check owner, repo, branch, and file path.";
+  }
+  if (status === 409) {
+    return "Conflict — entries.json changed on GitHub (another tab or commit?). Saving will retry automatically.";
+  }
+  return message || ("HTTP " + status);
+}
+
 function ghErrorText(res, fallback) {
   return res.json()
-    .then(j => (j && j.message) || fallback)
-    .catch(() => fallback);
+    .then(j => ghFriendlyError(res.status, (j && j.message) || fallback))
+    .catch(() => ghFriendlyError(res.status, fallback));
 }
 
 function ghGetFile() {
   const url = `${GH_API}/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${encodeURIComponent(ghConfig.path)}?ref=${encodeURIComponent(ghConfig.branch)}`;
   return fetch(url, { headers: ghHeaders() }).then(async res => {
     if (res.status === 404) return { sha: null, entries: null };
-    if (!res.ok) throw new Error("Load failed: " + await ghErrorText(res, res.statusText));
+    if (!res.ok) {
+      const err = new Error("Load failed: " + await ghErrorText(res, res.statusText));
+      err.status = res.status;
+      throw err;
+    }
     const j = await res.json();
     const decoded = decodeBase64(j.content);
     let entries;
@@ -935,13 +958,25 @@ function ghPutFile(entries, sha) {
     headers: ghHeaders(),
     body: JSON.stringify(body)
   }).then(async res => {
-    if (!res.ok) throw new Error("Save failed: " + await ghErrorText(res, res.statusText));
+    if (!res.ok) {
+      const err = new Error("Save failed: " + await ghErrorText(res, res.statusText));
+      err.status = res.status;
+      throw err;
+    }
     return res.json();
   });
 }
 
-function saveToGitHub(entries) {
-  return ghGetFile().then(f => ghPutFile(entries, f.sha));
+function saveToGitHub(entries, retriesLeft) {
+  if (retriesLeft === undefined) retriesLeft = 3;
+  return ghGetFile()
+    .then(f => ghPutFile(entries, f.sha))
+    .catch(err => {
+      if (err.status === 409 && retriesLeft > 0) {
+        return saveToGitHub(entries, retriesLeft - 1);
+      }
+      throw err;
+    });
 }
 
 /* ============================================================
@@ -1254,13 +1289,17 @@ async function testConnection() {
   msg.textContent = "Testing…";
   msg.className = "modal-msg";
   try {
-    const res = await fetch(`${GH_API}/repos/${ghConfig.owner}/${ghConfig.repo}`, { headers: ghHeaders() });
-    if (res.status === 401 || res.status === 403) {
-      throw new Error("Token rejected — check the token and its permissions");
+    const repoRes = await fetch(`${GH_API}/repos/${ghConfig.owner}/${ghConfig.repo}`, { headers: ghHeaders() });
+    if (repoRes.status === 401 || repoRes.status === 403) {
+      throw new Error(ghFriendlyError(repoRes.status, "Token rejected"));
     }
-    if (res.status === 404) throw new Error("Repo not found");
-    if (!res.ok) throw new Error("HTTP " + res.status + " " + res.statusText);
-    msg.textContent = "✓ Connected to " + ghConfig.owner + "/" + ghConfig.repo;
+    if (repoRes.status === 404) throw new Error("Repo not found — check owner and repo");
+    if (!repoRes.ok) throw new Error("HTTP " + repoRes.status + " " + repoRes.statusText);
+
+    // Verify the token can actually read file contents (not just repo metadata).
+    await ghGetFile();
+
+    msg.textContent = "✓ Connected to " + ghConfig.owner + "/" + ghConfig.repo + " — read/write OK";
     msg.className = "modal-msg ok";
   } catch (e) {
     msg.textContent = "✗ " + e.message;
