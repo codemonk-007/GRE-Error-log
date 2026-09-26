@@ -19,26 +19,5 @@
       "Factoring forms",
       "Quadratic formula fallback"
     ]
-  },
-  {
-    "date": "2026-09-27",
-    "source": "QB",
-    "qno": "298",
-    "topic": "Algebra",
-    "time": ">3 min",
-    "myans": "BDE",
-    "corrans": "BE",
-    "cause": "INcorrect factioring , forgot domain check for vx in denominator ",
-    "rule": "write donw the domain immediately when fractional algebraic expression ",
-    "mistakes": [
-      "Domain / edge case",
-      "Overcomplicated"
-    ],
-    "edges": [
-      "Extraneous solutions",
-      "Degree of polynomial",
-      "Factoring forms",
-      "Quadratic formula fallback"
-    ]
   }
 ]
