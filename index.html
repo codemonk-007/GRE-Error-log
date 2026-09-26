@@ -473,6 +473,141 @@
   #toast.error { background: var(--danger); }
   #toast.success { background: var(--success); }
 
+  /* Save indicator states */
+  #toolbar .saved-indicator.saving {
+    background: var(--accent-mistake-soft);
+    color: var(--accent-mistake);
+  }
+  #toolbar .saved-indicator.saving::before {
+    background: var(--accent-mistake);
+  }
+  #toolbar .saved-indicator.error {
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+  #toolbar .saved-indicator.error::before {
+    background: var(--danger);
+  }
+
+  #toolbar .gh-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  #toolbar .gh-status.connected {
+    background: var(--success-soft);
+    color: var(--success);
+    border-color: #a7f3d0;
+  }
+
+  /* Settings modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal {
+    width: 100%;
+    max-width: 480px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+    overflow: hidden;
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-header h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .modal-close {
+    border: none;
+    background: none;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  .modal-close:hover { background: var(--surface-alt); color: var(--text); }
+  .modal-body {
+    padding: 16px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .modal-hint {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .modal-hint code {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 11px;
+  }
+  .modal-body label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .modal-body input {
+    font-size: 13px;
+    font-family: inherit;
+    padding: 8px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: 7px;
+    color: var(--text);
+    background: var(--surface);
+  }
+  .modal-body input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.12);
+  }
+  .modal-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .modal-msg {
+    font-size: 12px;
+    min-height: 16px;
+  }
+  .modal-msg.ok { color: var(--success); }
+  .modal-msg.err { color: var(--danger); }
+
   @media print {
     @page { margin: 10mm; size: landscape; }
     body { background: #fff; padding: 0; font-size: 10px; }
@@ -509,17 +644,19 @@
 
 <header class="page-header">
   <h1>GRE Quant Mistakes Journal</h1>
-  <div class="sub">Auto-saves to your browser. Use Export to back up your journal.</div>
+  <div class="sub">Auto-saves to your GitHub repo (<code>entries.json</code>). Export downloads a JSON backup.</div>
 </header>
 
 <div id="toolbar">
   <button class="btn primary" onclick="addRow()">+ Add Entry</button>
+  <button class="btn" onclick="openSettings()" title="Connect GitHub">⚙ GitHub</button>
   <button class="btn" onclick="exportJournal()" title="Download a JSON backup">↧ Export</button>
   <button class="btn" onclick="document.getElementById('import-file').click()" title="Load a JSON backup">↥ Import</button>
   <button class="btn danger" onclick="clearAll()">Clear All</button>
   <input type="file" id="import-file" accept="application/json" hidden onchange="importJournal(this.files[0])">
   <div class="spacer"></div>
   <div class="status">
+    <span class="gh-status" id="gh-status">⚙ Not connected</span>
     <span class="saved-indicator" id="saved-indicator">Saved</span>
     <span class="info">Entries: <span id="count">0</span></span>
   </div>
@@ -549,6 +686,39 @@
     </table>
     <div class="empty-state hidden" id="empty-state">
       No entries yet. Click <strong>+ Add Entry</strong> to get started.
+    </div>
+  </div>
+</div>
+
+<div id="settings-overlay" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>GitHub Connection</h2>
+      <button class="modal-close" onclick="closeSettings()" title="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-hint">
+        Entries are saved to <code>entries.json</code> in your repo via the GitHub API.
+        Create a <b>fine-grained Personal Access Token</b> with <b>Contents: Read and write</b>
+        and <b>Metadata: Read-only</b> access to <code>codemonk-007/GRE-Error-log</code>.
+        The token is stored only in this browser.
+      </p>
+      <label>Personal Access Token
+        <input type="password" id="gh-token" placeholder="github_pat_…" autocomplete="off">
+      </label>
+      <div class="modal-row">
+        <label>Owner <input type="text" id="gh-owner" value="codemonk-007"></label>
+        <label>Repo <input type="text" id="gh-repo" value="GRE-Error-log"></label>
+      </div>
+      <div class="modal-row">
+        <label>Branch <input type="text" id="gh-branch" value="main"></label>
+        <label>File path <input type="text" id="gh-path" value="entries.json"></label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="testConnection()">Test connection</button>
+        <button class="btn primary" onclick="saveSettings()">Save</button>
+      </div>
+      <div id="settings-msg" class="modal-msg"></div>
     </div>
   </div>
 </div>
@@ -648,7 +818,17 @@ const MISTAKE_TYPES = [
 ];
 
 const TOPICS = EDGE_GROUPS.filter(g => g.title !== "General").map(g => g.title);
-const STORAGE_KEY = "greJournal.v1";
+const STORAGE_KEY = "greJournal.v1";            // local fallback cache
+const CONFIG_KEY = "greJournal.ghConfig.v1";    // GitHub connection settings
+const GH_API = "https://api.github.com";
+
+let ghConfig = {
+  token: "",
+  owner: "codemonk-007",
+  repo: "GRE-Error-log",
+  branch: "main",
+  path: "entries.json"
+};
 
 const MISTAKE_CHECKS_HTML = MISTAKE_TYPES.map(m =>
   `<label><input type="checkbox" data-field="mistake" value="${m}"><span>${m}</span></label>`
@@ -670,6 +850,7 @@ const EDGE_LIST_HTML = EDGE_GROUPS.map(g => `
 ============================================================ */
 let rowCounter = 0;
 let saveTimer = null;
+let saveChain = Promise.resolve();
 
 /* ============================================================
    HELPERS
@@ -693,6 +874,75 @@ function storageAvailable() {
   }
 }
 const HAS_STORAGE = storageAvailable();
+
+function encodeBase64Unicode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin);
+}
+
+function decodeBase64(b64) {
+  const bin = atob(b64);
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+/* ---------- GitHub API helpers ---------- */
+function ghConfigured() {
+  return !!(ghConfig.token && ghConfig.owner && ghConfig.repo);
+}
+
+function ghHeaders() {
+  return {
+    "Authorization": "Bearer " + ghConfig.token,
+    "Accept": "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+    "Content-Type": "application/json"
+  };
+}
+
+function ghErrorText(res, fallback) {
+  return res.json()
+    .then(j => (j && j.message) || fallback)
+    .catch(() => fallback);
+}
+
+function ghGetFile() {
+  const url = `${GH_API}/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${encodeURIComponent(ghConfig.path)}?ref=${encodeURIComponent(ghConfig.branch)}`;
+  return fetch(url, { headers: ghHeaders() }).then(async res => {
+    if (res.status === 404) return { sha: null, entries: null };
+    if (!res.ok) throw new Error("Load failed: " + await ghErrorText(res, res.statusText));
+    const j = await res.json();
+    const decoded = decodeBase64(j.content);
+    let entries;
+    try { entries = JSON.parse(decoded); }
+    catch (e) { throw new Error("entries.json is not valid JSON"); }
+    return { sha: j.sha, entries };
+  });
+}
+
+function ghPutFile(entries, sha) {
+  const body = {
+    message: "Update journal",
+    content: encodeBase64Unicode(JSON.stringify(entries, null, 2)),
+    branch: ghConfig.branch
+  };
+  if (sha) body.sha = sha;
+  const url = `${GH_API}/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${encodeURIComponent(ghConfig.path)}`;
+  return fetch(url, {
+    method: "PUT",
+    headers: ghHeaders(),
+    body: JSON.stringify(body)
+  }).then(async res => {
+    if (!res.ok) throw new Error("Save failed: " + await ghErrorText(res, res.statusText));
+    return res.json();
+  });
+}
+
+function saveToGitHub(entries) {
+  return ghGetFile().then(f => ghPutFile(entries, f.sha));
+}
 
 /* ============================================================
    BUILD ROW
@@ -830,10 +1080,8 @@ function clearAll() {
   if (!confirm("Delete all entries? This cannot be undone.")) return;
   document.getElementById("tbody").innerHTML = "";
   rowCounter = 0;
-  if (HAS_STORAGE) {
-    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-  }
   updateCount();
+  flushSave();
   toast("All entries cleared", "error");
 }
 
@@ -889,25 +1137,21 @@ function collectAllEntries() {
 /* ============================================================
    SAVE / LOAD
 ============================================================ */
-function scheduleSave() {
-  if (!HAS_STORAGE) return;
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveJournal, 250);
+function renderEntries(entries) {
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+  rowCounter = 0;
+  (entries || []).forEach(entry => tbody.appendChild(buildRow(entry)));
+  renumber();
 }
 
-function saveJournal() {
+function saveLocalCache(entries) {
   if (!HAS_STORAGE) return;
-  try {
-    const entries = collectAllEntries();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-    showSavedIndicator();
-  } catch (e) {
-    console.error("Save failed:", e);
-    toast("Could not save to browser storage", "error");
-  }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+  catch (e) { /* ignore */ }
 }
 
-function loadJournal() {
+function loadLocalCache() {
   if (!HAS_STORAGE) return false;
   let raw;
   try { raw = localStorage.getItem(STORAGE_KEY); }
@@ -919,21 +1163,128 @@ function loadJournal() {
   catch (e) { return false; }
   if (!Array.isArray(entries) || entries.length === 0) return false;
 
-  const tbody = document.getElementById("tbody");
-  tbody.innerHTML = "";
-  rowCounter = 0;
-  entries.forEach(entry => {
-    tbody.appendChild(buildRow(entry));
-  });
-  renumber();
+  renderEntries(entries);
   return true;
 }
 
-function showSavedIndicator() {
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flushSave, 800);
+}
+
+function flushSave() {
+  const entries = collectAllEntries();
+  saveLocalCache(entries);
+  if (!ghConfigured()) {
+    setSaveIndicator("Saved locally");
+    return;
+  }
+  setSaveIndicator("Saving…", "saving");
+  saveChain = saveChain
+    .then(() => saveToGitHub(entries))
+    .then(() => setSaveIndicator("Saved to GitHub"))
+    .catch(err => {
+      console.error("GitHub save failed:", err);
+      setSaveIndicator("Save failed", "error");
+      toast(err.message, "error");
+    });
+}
+
+function setSaveIndicator(text, kind) {
   const el = document.getElementById("saved-indicator");
-  el.classList.add("show");
+  el.textContent = text;
+  el.className = "saved-indicator show" + (kind ? " " + kind : "");
   clearTimeout(el._hideTimer);
-  el._hideTimer = setTimeout(() => el.classList.remove("show"), 1400);
+  el._hideTimer = setTimeout(() => el.classList.remove("show"), 2000);
+}
+
+/* ============================================================
+   GITHUB SETTINGS
+============================================================ */
+function openSettings() {
+  document.getElementById("gh-token").value = ghConfig.token;
+  document.getElementById("gh-owner").value = ghConfig.owner;
+  document.getElementById("gh-repo").value = ghConfig.repo;
+  document.getElementById("gh-branch").value = ghConfig.branch;
+  document.getElementById("gh-path").value = ghConfig.path;
+  document.getElementById("settings-msg").textContent = "";
+  document.getElementById("settings-overlay").classList.remove("hidden");
+}
+
+function closeSettings() {
+  document.getElementById("settings-overlay").classList.add("hidden");
+}
+
+function readSettingsForm() {
+  ghConfig.token = document.getElementById("gh-token").value.trim();
+  ghConfig.owner = document.getElementById("gh-owner").value.trim();
+  ghConfig.repo = document.getElementById("gh-repo").value.trim();
+  ghConfig.branch = document.getElementById("gh-branch").value.trim() || "main";
+  ghConfig.path = document.getElementById("gh-path").value.trim() || "entries.json";
+}
+
+function saveSettings() {
+  readSettingsForm();
+  if (HAS_STORAGE) {
+    try { localStorage.setItem(CONFIG_KEY, JSON.stringify(ghConfig)); }
+    catch (e) { /* ignore */ }
+  }
+  updateGhStatus();
+  closeSettings();
+  toast("GitHub settings saved");
+  if (ghConfigured()) {
+    const entries = collectAllEntries();
+    if (entries.length) {
+      setSaveIndicator("Saving…", "saving");
+      saveChain = saveChain
+        .then(() => saveToGitHub(entries))
+        .then(() => setSaveIndicator("Saved to GitHub"))
+        .catch(err => {
+          console.error("GitHub save failed:", err);
+          setSaveIndicator("Save failed", "error");
+          toast(err.message, "error");
+        });
+    }
+  }
+}
+
+async function testConnection() {
+  readSettingsForm();
+  const msg = document.getElementById("settings-msg");
+  msg.textContent = "Testing…";
+  msg.className = "modal-msg";
+  try {
+    const res = await fetch(`${GH_API}/repos/${ghConfig.owner}/${ghConfig.repo}`, { headers: ghHeaders() });
+    if (res.status === 401 || res.status === 403) {
+      throw new Error("Token rejected — check the token and its permissions");
+    }
+    if (res.status === 404) throw new Error("Repo not found");
+    if (!res.ok) throw new Error("HTTP " + res.status + " " + res.statusText);
+    msg.textContent = "✓ Connected to " + ghConfig.owner + "/" + ghConfig.repo;
+    msg.className = "modal-msg ok";
+  } catch (e) {
+    msg.textContent = "✗ " + e.message;
+    msg.className = "modal-msg err";
+  }
+}
+
+function updateGhStatus() {
+  const el = document.getElementById("gh-status");
+  if (ghConfigured()) {
+    el.textContent = "✓ " + ghConfig.owner + "/" + ghConfig.repo;
+    el.className = "gh-status connected";
+  } else {
+    el.textContent = "⚙ Not connected";
+    el.className = "gh-status";
+  }
+}
+
+function loadConfig() {
+  if (!HAS_STORAGE) return;
+  try {
+    const raw = localStorage.getItem(CONFIG_KEY);
+    if (raw) ghConfig = Object.assign({}, ghConfig, JSON.parse(raw));
+  } catch (e) { /* ignore */ }
 }
 
 /* ============================================================
@@ -982,7 +1333,7 @@ function importJournal(file) {
     entries.forEach(entry => tbody.appendChild(buildRow(entry)));
     renumber();
     updateCount();
-    saveJournal();
+    scheduleSave();
     toast(`Imported ${entries.length} entries`, "success");
   };
   reader.readAsText(file);
@@ -1019,13 +1370,38 @@ document.addEventListener("change", e => {
    INIT
 ============================================================ */
 (function init() {
-  const loaded = loadJournal();
-  if (!loaded) {
-    addRow();
-    addRow();
-    addRow();
+  loadConfig();
+  updateGhStatus();
+
+  async function boot() {
+    let loaded = false;
+
+    if (ghConfigured()) {
+      try {
+        const res = await ghGetFile();
+        if (Array.isArray(res.entries)) {
+          renderEntries(res.entries);
+          loaded = true;
+          setSaveIndicator("Loaded from GitHub");
+        }
+      } catch (e) {
+        console.error("GitHub load failed:", e);
+        toast("Could not load from GitHub: " + e.message, "error");
+      }
+    }
+
+    if (!loaded) loaded = loadLocalCache();
+
+    if (!loaded) {
+      const tbody = document.getElementById("tbody");
+      tbody.appendChild(buildRow(null));
+      tbody.appendChild(buildRow(null));
+      tbody.appendChild(buildRow(null));
+      renumber();
+    }
+    updateCount();
   }
-  updateCount();
+  boot();
 })();
 </script>
 
