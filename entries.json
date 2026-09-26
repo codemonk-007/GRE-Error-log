@@ -7,9 +7,16 @@
     "time": ">3 min",
     "myans": "BDE",
     "corrans": "BE",
-    "cause": "",
+    "cause": "INcorrect factioring ",
     "rule": "",
-    "mistakes": [],
-    "edges": []
+    "mistakes": [
+      "Domain / edge case",
+      "Overcomplicated"
+    ],
+    "edges": [
+      "Extraneous solutions",
+      "Factoring forms",
+      "Quadratic formula fallback"
+    ]
   }
 ]
